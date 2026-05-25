@@ -105,6 +105,21 @@ export class CreateInvitationDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  primaryColor?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  fontFamily?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  backgroundStyle?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsDateString()
   rsvpDeadline?: string;
 
