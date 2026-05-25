@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Invitation {
+  id           String           @id @default(cuid())
+  slug         String           @unique
+  brideName    String
+  groomName    String
+  weddingDate  DateTime
+  story          String?
+  videoUrl       String?
+  coverImageUrl  String?
+  status           InvitationStatus @default(DRAFT)
+  invitationType   InvitationType   @default(MINI_WEBSITE)
+  rsvpDeadline DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  events         Event[]
+  contacts       InvitationContact[]
+  giftRegistries GiftRegistry[]
+  rsvps          RSVP[]
+}
+
+enum InvitationStatus {
+  DRAFT
+  ACTIVE
+  EXPIRED
+}
+
+enum InvitationType {
+  MINI_WEBSITE
+  VIDEO
+  VIDEO_PROSKLITIRIO
+}
+
+model Event {
+  id           String     @id @default(cuid())
+  invitationId String
+  invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  type         EventType
+  name         String
+  date         DateTime
+  address      String?
+  mapsUrl      String?
+}
+
+enum EventType {
+  CEREMONY
+  RECEPTION
+}
+
+model InvitationContact {
+  id           String      @id @default(cuid())
+  invitationId String
+  invitation   Invitation  @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  role         ContactRole
+  name         String
+  phone        String?
+  email        String?
+}
+
+enum ContactRole {
+  BRIDE
+  GROOM
+  BEST_MAN
+  MAID_OF_HONOR
+}
+
+model GiftRegistry {
+  id           String     @id @default(cuid())
+  invitationId String
+  invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  ownerName    String
+  bankName     String?
+  iban         String
+}
+
+model RSVP {
+  id           String      @id @default(cuid())
+  invitationId String
+  invitation   Invitation  @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  guestName    String
+  phone        String?
+  attending    Boolean
+  adultCount   Int         @default(1)
+  hasChildren  Boolean     @default(false)
+  childCount   Int         @default(0)
+  dietary      DietaryType @default(NONE)
+  hasAllergy   Boolean     @default(false)
+  allergyNote  String?
+  message      String?
+  submittedAt  DateTime    @default(now())
+}
+
+enum DietaryType {
+  NONE
+  VEGAN
+  VEGETARIAN
+}
