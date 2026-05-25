@@ -3,7 +3,7 @@ services:
     name: adifinity-invitations-api
     env: node
     plan: free
-    buildCommand: pnpm install --no-frozen-lockfile --prod=false && npx prisma generate && pnpm run build
+    buildCommand: npm install && npx prisma generate && npm run build
     startCommand: node dist/main.js
     envVars:
       - key: DATABASE_URL
