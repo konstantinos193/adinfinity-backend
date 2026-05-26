@@ -22,9 +22,13 @@ model Invitation {
   story          String?
   videoUrl       String?
   coverImageUrl  String?
+  coverImages    String[]
+  galleryImages  String[]
   primaryColor    String?
   fontFamily      String?
+  fontColor       String?
   backgroundStyle String?
+  musicUrl        String?
   status           InvitationStatus @default(DRAFT)
   invitationType   InvitationType   @default(MINI_WEBSITE)
   rsvpDeadline DateTime?

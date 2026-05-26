@@ -10,6 +10,7 @@ import {
   IsUrl,
   ValidateNested,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ContactRole, EventType, InvitationType } from '@prisma/client';
 
 class CreateEventDto {
@@ -103,6 +104,20 @@ export class CreateInvitationDto {
   @IsUrl()
   coverImageUrl?: string;
 
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) => (Array.isArray(value) ? value : []))
+  coverImages?: string[];
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) => (Array.isArray(value) ? value : []))
+  galleryImages?: string[];
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
@@ -116,7 +131,17 @@ export class CreateInvitationDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  fontColor?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   backgroundStyle?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  musicUrl?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
