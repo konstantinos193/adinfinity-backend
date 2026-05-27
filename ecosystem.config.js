@@ -7,7 +7,7 @@ module.exports = {
       exec_mode: 'cluster',
       env_file: '.env',
       wait_ready: true,
-      listen_timeout: 10000,
+      listen_timeout: 30000,
       kill_timeout: 5000,
     },
   ],

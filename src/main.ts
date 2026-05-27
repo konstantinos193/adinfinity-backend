@@ -39,5 +39,6 @@ async function bootstrap() {
   console.log(`>>> BOUND on ${host}:${port} (build: ${new Date().toISOString()})`);
   console.log(`🚀 Invitations API running on http://${host}:${port}`);
   console.log(`📖 Swagger docs at http://${host}:${port}/api/docs`);
+  if (process.send) process.send('ready');
 }
 bootstrap();
