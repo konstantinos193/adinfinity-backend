@@ -30,9 +30,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = process.env.PORT ?? 3001;
-  await app.listen(port);
-  console.log(`🚀 Invitations API running on http://localhost:${port}`);
-  console.log(`📖 Swagger docs at http://localhost:${port}/api/docs`);
+  const port = Number(process.env.PORT ?? 3001);
+  const host = '::';
+  console.log(`>>> About to bind to ${host}:${port}`);
+  await app.listen(port, host);
+  console.log(`>>> BOUND on ${host}:${port} (build: ${new Date().toISOString()})`);
+  console.log(`🚀 Invitations API running on http://${host}:${port}`);
+  console.log(`📖 Swagger docs at http://${host}:${port}/api/docs`);
 }
 bootstrap();
