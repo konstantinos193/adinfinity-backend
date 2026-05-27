@@ -30,6 +30,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
+  app.enableShutdownHooks();
+
   const port = Number(process.env.PORT ?? 3001);
   const host = '::';
   console.log(`>>> About to bind to ${host}:${port}`);
