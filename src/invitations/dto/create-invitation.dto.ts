@@ -11,7 +11,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { ContactRole, EventType, InvitationType } from '@prisma/client';
+import { ContactRole, EventCategory, EventType, InvitationType } from '@prisma/client';
 
 class CreateEventDto {
   @ApiProperty({ enum: EventType })
@@ -77,17 +77,43 @@ export class CreateInvitationDto {
   @IsString()
   slug: string;
 
-  @ApiProperty()
-  @IsString()
-  brideName: string;
+  @ApiPropertyOptional({ enum: EventCategory })
+  @IsOptional()
+  @IsEnum(EventCategory)
+  eventCategory?: EventCategory;
 
-  @ApiProperty()
+  // Wedding fields
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
-  groomName: string;
+  brideName?: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  groomName?: string;
+
+  // Baptism fields
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  childName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  fatherName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  motherName?: string;
+
+  // Shared event date
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsDateString()
-  weddingDate: string;
+  weddingDate?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

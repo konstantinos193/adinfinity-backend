@@ -16,9 +16,16 @@ model Admin {
 model Invitation {
   id           String           @id @default(cuid())
   slug         String           @unique
-  brideName    String
-  groomName    String
-  weddingDate  DateTime
+  eventCategory    EventCategory    @default(WEDDING)
+  // Wedding fields
+  brideName    String?
+  groomName    String?
+  // Baptism fields
+  childName    String?
+  fatherName   String?
+  motherName   String?
+  // Shared event date (wedding date or baptism date)
+  weddingDate  DateTime?
   story          String?
   videoUrl       String?
   coverImageUrl  String?
@@ -39,6 +46,12 @@ model Invitation {
   contacts       InvitationContact[]
   giftRegistries GiftRegistry[]
   rsvps          RSVP[]
+}
+
+enum EventCategory {
+  WEDDING
+  BAPTISM
+  WEDDING_BAPTISM
 }
 
 enum InvitationStatus {
@@ -84,6 +97,10 @@ enum ContactRole {
   GROOM
   BEST_MAN
   MAID_OF_HONOR
+  FATHER
+  MOTHER
+  GODFATHER
+  GODMOTHER
 }
 
 model GiftRegistry {

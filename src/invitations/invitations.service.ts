@@ -19,7 +19,7 @@ export class InvitationsService {
     return this.prisma.invitation.create({
       data: {
         ...rest,
-        weddingDate: new Date(rest.weddingDate),
+        weddingDate: rest.weddingDate ? new Date(rest.weddingDate) : undefined,
         rsvpDeadline: rest.rsvpDeadline ? new Date(rest.rsvpDeadline) : undefined,
         events: events ? { create: events.map((e) => ({ ...e, date: new Date(e.date) })) } : undefined,
         contacts: contacts ? { create: contacts } : undefined,
