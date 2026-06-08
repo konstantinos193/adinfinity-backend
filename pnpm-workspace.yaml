@@ -17,6 +17,11 @@ minimumReleaseAgeExclude:
   - '@typescript-eslint/utils@8.60.0'
   - '@typescript-eslint/visitor-keys@8.60.0'
   - typescript-eslint@8.60.0
+  - '@nestjs/cli@11.0.22'
+  - '@nestjs/common@11.1.26'
+  - '@nestjs/core@11.1.26'
+  - '@nestjs/platform-express@11.1.26'
+  - '@nestjs/testing@11.1.26'
 allowBuilds:
   '@prisma/engines': true
   prisma: true
