@@ -24,16 +24,6 @@
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "prisma",
-      "@prisma/engines",
-      "@prisma/client",
-      "@nestjs/core",
-      "@scarf/scarf",
-      "unrs-resolver"
-    ]
-  },
   "dependencies": {
     "@nestjs/common": "^11.1.26",
     "@nestjs/config": "^4.0.4",

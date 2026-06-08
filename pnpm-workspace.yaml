@@ -24,4 +24,6 @@ minimumReleaseAgeExclude:
   - '@nestjs/testing@11.1.26'
 allowBuilds:
   '@prisma/engines': true
+  '@scarf/scarf': true
   prisma: true
+  unrs-resolver: true
