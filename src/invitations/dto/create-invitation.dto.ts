@@ -5,6 +5,7 @@ import {
   IsDateString,
   IsEmail,
   IsEnum,
+  IsInt,
   IsOptional,
   IsString,
   IsUrl,
@@ -108,6 +109,27 @@ export class CreateInvitationDto {
   @IsOptional()
   @IsString()
   motherName?: string;
+
+  // Generic fields (anniversary / birthday / event)
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  eventTitle?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  honoreeName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  hostName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  yearsCount?: number;
 
   // Shared event date
   @ApiPropertyOptional()

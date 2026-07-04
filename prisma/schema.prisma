@@ -24,6 +24,11 @@ model Invitation {
   childName    String?
   fatherName   String?
   motherName   String?
+  // Generic fields (anniversary / birthday / event)
+  eventTitle   String?
+  honoreeName  String?
+  hostName     String?
+  yearsCount   Int?
   // Shared event date (wedding date or baptism date)
   weddingDate  DateTime?
   story          String?
@@ -52,6 +57,9 @@ enum EventCategory {
   WEDDING
   BAPTISM
   WEDDING_BAPTISM
+  ANNIVERSARY
+  BIRTHDAY
+  EVENT
 }
 
 enum InvitationStatus {
@@ -101,6 +109,7 @@ enum ContactRole {
   MOTHER
   GODFATHER
   GODMOTHER
+  HOST
 }
 
 model GiftRegistry {

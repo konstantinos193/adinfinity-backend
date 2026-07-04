@@ -6,6 +6,8 @@ git fetch origin main && git reset --hard origin/main
 echo "[deploy] installing deps..."
 pnpm install --frozen-lockfile
 npx prisma generate
+echo "[deploy] syncing db schema (no --accept-data-loss: aborts rather than drop columns)..."
+npx prisma db push
 echo "[deploy] building..."
 rm -f tsconfig.build.tsbuildinfo
 pnpm run build
