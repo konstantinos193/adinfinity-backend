@@ -3,6 +3,10 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Ip,
   Param,
   Patch,
   Post,
@@ -11,19 +15,43 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
+import { UnlockInvitationDto } from './dto/unlock-invitation.dto';
 import { UpdateInvitationDto } from './dto/update-invitation.dto';
+import { InvitationAccessService } from './invitation-access.service';
 import { InvitationsService } from './invitations.service';
 
 @ApiTags('invitations')
 @Controller('invitations')
 export class InvitationsController {
-  constructor(private service: InvitationsService) {}
+  constructor(
+    private service: InvitationsService,
+    private access: InvitationAccessService,
+  ) {}
 
-  // Public: fetch invitation mini-website data by slug
+  // Public: fetch invitation mini-website data by slug.
+  // A PIN-protected invitation returns only a locked stub unless the caller
+  // presents a valid unlock token for this exact slug.
   @Get(':slug')
   @ApiOperation({ summary: 'Get invitation by slug (public)' })
-  findBySlug(@Param('slug') slug: string) {
-    return this.service.findBySlug(slug);
+  findBySlug(
+    @Param('slug') slug: string,
+    @Headers('authorization') authorization?: string,
+  ) {
+    return this.service.findBySlug(
+      slug,
+      this.access.isUnlocked(slug, authorization),
+    );
+  }
+
+  @Post(':slug/unlock')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Exchange an invitation PIN for an access token' })
+  unlock(
+    @Param('slug') slug: string,
+    @Body() dto: UnlockInvitationDto,
+    @Ip() ip: string,
+  ) {
+    return this.access.unlock(slug, dto.pin, ip);
   }
 }
 

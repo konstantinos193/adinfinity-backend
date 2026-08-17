@@ -45,6 +45,112 @@ export class EmailService {
       this.logger.error(`Failed to send RSVP email: ${err}`);
     }
   }
+
+  /** Notifies the agency that someone requested an invitation from the site. */
+  async sendLeadNotification(opts: {
+    to: string;
+    coupleName: string;
+    email: string;
+    phone?: string;
+    eventDate?: string;
+    invitationType: string;
+    message?: string;
+  }) {
+    const html = buildLeadEmailHtml(opts);
+
+    try {
+      await this.transporter.sendMail({
+        from: `"${this.config.get('EMAIL_FROM_NAME', 'Invitations Platform')}" <${this.config.get('EMAIL_USER')}>`,
+        to: opts.to,
+        // Lets the agency hit Reply and land in the couple's inbox.
+        replyTo: opts.email,
+        subject: `Νέα αίτηση προσκλητηρίου — ${opts.coupleName}`,
+        html,
+      });
+    } catch (err) {
+      this.logger.error(`Failed to send lead email: ${err}`);
+      throw err;
+    }
+  }
+}
+
+const INVITATION_TYPE_LABELS: Record<string, string> = {
+  MINI_WEBSITE: 'Mini Website Προσκλητήριο',
+  VIDEO_PROSKLITIRIO: 'Video Προσκλητήριο',
+  VIDEO: 'Video Only',
+  UNSURE: 'Δεν έχει αποφασίσει ακόμη',
+};
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function buildLeadEmailHtml(opts: {
+  coupleName: string;
+  email: string;
+  phone?: string;
+  eventDate?: string;
+  invitationType: string;
+  message?: string;
+}) {
+  const rows = [
+    row('Ζευγάρι', escapeHtml(opts.coupleName)),
+    row(
+      'Email',
+      `<a href="mailto:${escapeHtml(opts.email)}" style="color:#b8960c">${escapeHtml(opts.email)}</a>`,
+    ),
+    opts.phone
+      ? row(
+          'Τηλέφωνο',
+          `<a href="tel:${escapeHtml(opts.phone)}" style="color:#b8960c">${escapeHtml(opts.phone)}</a>`,
+        )
+      : '',
+    opts.eventDate ? row('Ημερομηνία', escapeHtml(opts.eventDate)) : '',
+    row(
+      'Τύπος',
+      escapeHtml(
+        INVITATION_TYPE_LABELS[opts.invitationType] ?? opts.invitationType,
+      ),
+    ),
+  ].join('');
+
+  const messageBlock = opts.message
+    ? row('Μήνυμα', escapeHtml(opts.message).replace(/\n/g, '<br>'))
+    : '';
+
+  return `<!DOCTYPE html>
+<html lang="el">
+<body style="margin:0;padding:0;background:#fdfaf6">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#fdfaf6;padding:32px 12px">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border:1px solid #efe8de;border-radius:12px;overflow:hidden">
+
+        <tr><td style="padding:28px 24px 8px;text-align:center">
+          <p style="margin:0;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#b8960c;font-family:'Inter',Arial,sans-serif">Νέα αίτηση προσκλητηρίου</p>
+          <h1 style="margin:8px 0 0;font-size:22px;color:#2c1810;font-family:'Inter',Arial,sans-serif">${escapeHtml(opts.coupleName)}</h1>
+          <div style="margin:16px auto 0;width:60px;height:1px;background:linear-gradient(90deg,transparent,#b8960c,transparent)"></div>
+        </td></tr>
+
+        <tr><td>
+          <table width="100%" cellpadding="0" cellspacing="0">
+            ${rows}
+            ${messageBlock}
+          </table>
+        </td></tr>
+
+        <tr><td style="padding:24px 0;text-align:center">
+          <p style="margin:0;font-size:10px;color:#c9b8a8;letter-spacing:0.14em;text-transform:uppercase;font-family:'Inter',Arial,sans-serif">adinfinity &nbsp;·&nbsp; invitations.adinfinity.gr</p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 }
 
 function row(label: string, value: string) {

@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { AccessMode } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { UpdateInvitationDto } from './dto/update-invitation.dto';
+import { InvitationAccessService } from './invitation-access.service';
 
 const INVITATION_INCLUDE = {
   events: true,
@@ -10,15 +12,30 @@ const INVITATION_INCLUDE = {
   _count: { select: { rsvps: true } },
 } as const;
 
+/**
+ * Replaces the stored PIN hash with a boolean before anything leaves the API.
+ * Admin needs to know whether a PIN is set, never what it is — changing one is
+ * a replacement, not an edit.
+ */
+function stripPin<T extends { accessPin?: string | null }>(inv: T) {
+  const { accessPin, ...rest } = inv;
+  return { ...rest, hasPin: Boolean(accessPin) };
+}
+
 @Injectable()
 export class InvitationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private access: InvitationAccessService,
+  ) {}
 
   async create(dto: CreateInvitationDto) {
-    const { events, contacts, giftRegistries, ...rest } = dto;
+    const { events, contacts, giftRegistries, accessPin, ...rest } = dto;
     return this.prisma.invitation.create({
       data: {
         ...rest,
+        // Stored hashed; the plaintext never touches the database.
+        accessPin: await this.access.hashPin(accessPin),
         weddingDate: rest.weddingDate ? new Date(rest.weddingDate) : undefined,
         rsvpDeadline: rest.rsvpDeadline
           ? new Date(rest.rsvpDeadline)
@@ -34,19 +51,40 @@ export class InvitationsService {
   }
 
   async findAll() {
-    return this.prisma.invitation.findMany({
+    const list = await this.prisma.invitation.findMany({
       include: INVITATION_INCLUDE,
       orderBy: { createdAt: 'desc' },
     });
+    return list.map(stripPin);
   }
 
-  async findBySlug(slug: string) {
+  /**
+   * Public read.
+   *
+   * When the invitation is PIN-protected and the caller hasn't unlocked it,
+   * this returns a stub with no personal data at all. The filtering happens
+   * here rather than in the frontend on purpose: hiding fields client-side
+   * would still ship the couple's phone numbers and IBAN to the browser.
+   */
+  async findBySlug(slug: string, unlocked = false) {
     const inv = await this.prisma.invitation.findUnique({
       where: { slug },
       include: INVITATION_INCLUDE,
     });
     if (!inv) throw new NotFoundException(`Invitation "${slug}" not found`);
-    return inv;
+
+    if (inv.accessMode === AccessMode.PIN && !unlocked) {
+      return {
+        slug: inv.slug,
+        accessMode: inv.accessMode,
+        locked: true as const,
+        invitationType: inv.invitationType,
+      };
+    }
+
+    // Never expose the hash, even to an unlocked guest.
+    const { accessPin: _accessPin, ...safe } = inv;
+    return { ...safe, locked: false as const };
   }
 
   async findOne(id: string) {
@@ -55,16 +93,20 @@ export class InvitationsService {
       include: INVITATION_INCLUDE,
     });
     if (!inv) throw new NotFoundException(`Invitation "${id}" not found`);
-    return inv;
+    return stripPin(inv);
   }
 
   async update(id: string, dto: UpdateInvitationDto) {
     await this.findOne(id);
-    const { events, contacts, giftRegistries, ...rest } = dto;
+    const { events, contacts, giftRegistries, accessPin, ...rest } = dto;
     return this.prisma.invitation.update({
       where: { id },
       data: {
         ...rest,
+        // undefined = leave the existing PIN alone; '' = clear it.
+        ...(accessPin !== undefined && {
+          accessPin: await this.access.hashPin(accessPin),
+        }),
         weddingDate: rest.weddingDate ? new Date(rest.weddingDate) : undefined,
         rsvpDeadline:
           rest.rsvpDeadline !== undefined

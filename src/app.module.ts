@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { InvitationsModule } from './invitations/invitations.module';
+import { LeadsModule } from './leads/leads.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RsvpModule } from './rsvp/rsvp.module';
 
@@ -14,6 +15,7 @@ import { RsvpModule } from './rsvp/rsvp.module';
     AuthModule,
     InvitationsModule,
     RsvpModule,
+    LeadsModule,
   ],
 })
 export class AppModule {}

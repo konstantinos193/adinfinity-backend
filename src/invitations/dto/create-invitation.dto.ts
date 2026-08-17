@@ -9,10 +9,12 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  MaxLength,
   ValidateNested,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import {
+  AccessMode,
   ContactRole,
   EventCategory,
   EventType,
@@ -205,6 +207,21 @@ export class CreateInvitationDto {
   @IsOptional()
   @IsEnum(InvitationType)
   invitationType?: InvitationType;
+
+  @ApiPropertyOptional({ enum: AccessMode })
+  @IsOptional()
+  @IsEnum(AccessMode)
+  accessMode?: AccessMode;
+
+  /**
+   * Plaintext PIN — hashed by the service before it reaches the database and
+   * never returned by the API. Empty string clears an existing PIN.
+   */
+  @ApiPropertyOptional({ example: '1234' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  accessPin?: string;
 
   @ApiPropertyOptional({ type: [CreateEventDto] })
   @IsOptional()
