@@ -17,7 +17,8 @@ export class RsvpService {
       where: { slug },
       include: { contacts: true },
     });
-    if (!invitation) throw new NotFoundException(`Invitation "${slug}" not found`);
+    if (!invitation)
+      throw new NotFoundException(`Invitation "${slug}" not found`);
 
     const rsvpData = {
       invitationId: invitation.id,
@@ -42,7 +43,10 @@ export class RsvpService {
       : null;
 
     const rsvp = existing
-      ? await this.prisma.rSVP.update({ where: { id: existing.id }, data: rsvpData })
+      ? await this.prisma.rSVP.update({
+          where: { id: existing.id },
+          data: rsvpData,
+        })
       : await this.prisma.rSVP.create({ data: rsvpData });
 
     // Notify both bride and groom by email

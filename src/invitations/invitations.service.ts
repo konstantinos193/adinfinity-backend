@@ -20,8 +20,12 @@ export class InvitationsService {
       data: {
         ...rest,
         weddingDate: rest.weddingDate ? new Date(rest.weddingDate) : undefined,
-        rsvpDeadline: rest.rsvpDeadline ? new Date(rest.rsvpDeadline) : undefined,
-        events: events ? { create: events.map((e) => ({ ...e, date: new Date(e.date) })) } : undefined,
+        rsvpDeadline: rest.rsvpDeadline
+          ? new Date(rest.rsvpDeadline)
+          : undefined,
+        events: events
+          ? { create: events.map((e) => ({ ...e, date: new Date(e.date) })) }
+          : undefined,
         contacts: contacts ? { create: contacts } : undefined,
         giftRegistries: giftRegistries ? { create: giftRegistries } : undefined,
       },
@@ -62,9 +66,12 @@ export class InvitationsService {
       data: {
         ...rest,
         weddingDate: rest.weddingDate ? new Date(rest.weddingDate) : undefined,
-        rsvpDeadline: rest.rsvpDeadline !== undefined
-          ? (rest.rsvpDeadline ? new Date(rest.rsvpDeadline) : null)
-          : undefined,
+        rsvpDeadline:
+          rest.rsvpDeadline !== undefined
+            ? rest.rsvpDeadline
+              ? new Date(rest.rsvpDeadline)
+              : null
+            : undefined,
         // If arrays provided: wipe + recreate (simplest safe approach)
         ...(events !== undefined && {
           events: {

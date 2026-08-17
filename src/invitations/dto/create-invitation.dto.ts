@@ -12,7 +12,12 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { ContactRole, EventCategory, EventType, InvitationType } from '@prisma/client';
+import {
+  ContactRole,
+  EventCategory,
+  EventType,
+  InvitationType,
+} from '@prisma/client';
 
 class CreateEventDto {
   @ApiProperty({ enum: EventType })

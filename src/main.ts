@@ -17,9 +17,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, transform: true }),
-  );
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const config = new DocumentBuilder()
     .setTitle('Invitations API')
@@ -36,7 +34,9 @@ async function bootstrap() {
   const host = '::';
   console.log(`>>> About to bind to ${host}:${port}`);
   await app.listen(port, host);
-  console.log(`>>> BOUND on ${host}:${port} (build: ${new Date().toISOString()})`);
+  console.log(
+    `>>> BOUND on ${host}:${port} (build: ${new Date().toISOString()})`,
+  );
   console.log(`🚀 Invitations API running on http://${host}:${port}`);
   console.log(`📖 Swagger docs at http://${host}:${port}/api/docs`);
   if (process.send) process.send('ready');
