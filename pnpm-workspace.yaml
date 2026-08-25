@@ -6,22 +6,24 @@ onlyBuiltDependencies:
   - prisma
   - unrs-resolver
 minimumReleaseAgeExclude:
-  - '@typescript-eslint/eslint-plugin@8.60.0'
-  - '@typescript-eslint/parser@8.60.0'
-  - '@typescript-eslint/project-service@8.60.0'
-  - '@typescript-eslint/scope-manager@8.60.0'
-  - '@typescript-eslint/tsconfig-utils@8.60.0'
-  - '@typescript-eslint/type-utils@8.60.0'
-  - '@typescript-eslint/types@8.60.0'
-  - '@typescript-eslint/typescript-estree@8.60.0'
-  - '@typescript-eslint/utils@8.60.0'
-  - '@typescript-eslint/visitor-keys@8.60.0'
-  - typescript-eslint@8.60.0
+  - '@typescript-eslint/eslint-plugin@8.60.0 || 8.68.0'
+  - '@typescript-eslint/parser@8.60.0 || 8.68.0'
+  - '@typescript-eslint/project-service@8.60.0 || 8.68.0'
+  - '@typescript-eslint/scope-manager@8.60.0 || 8.68.0'
+  - '@typescript-eslint/tsconfig-utils@8.60.0 || 8.68.0'
+  - '@typescript-eslint/type-utils@8.60.0 || 8.68.0'
+  - '@typescript-eslint/types@8.60.0 || 8.68.0'
+  - '@typescript-eslint/typescript-estree@8.60.0 || 8.68.0'
+  - '@typescript-eslint/utils@8.60.0 || 8.68.0'
+  - '@typescript-eslint/visitor-keys@8.60.0 || 8.68.0'
+  - typescript-eslint@8.60.0 || 8.68.0
   - '@nestjs/cli@11.0.22'
   - '@nestjs/common@11.1.26'
   - '@nestjs/core@11.1.26'
   - '@nestjs/platform-express@11.1.26'
   - '@nestjs/testing@11.1.26'
+  - '@types/node@26.3.0'
+  - eslint@10.9.1
 allowBuilds:
   '@prisma/engines': true
   '@scarf/scarf': true
