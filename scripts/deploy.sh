@@ -112,7 +112,7 @@ docker tag "$NEW_IMAGE" "$LOCAL_IMAGE:$NEXT"
 # DATABASE_URL.
 log "Syncing DB schema (prisma db push)..."
 if ! docker compose --profile "$NEXT" run --rm --no-deps --name adinfinity-schema-sync \
-        "backend-$NEXT" npx prisma db push --skip-generate; then
+        "backend-$NEXT" npx prisma db push; then
     log "ERROR: schema sync failed — staying on $CURRENT"
     exit 1
 fi
