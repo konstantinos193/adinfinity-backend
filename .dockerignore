@@ -2,15 +2,25 @@ node_modules
 dist
 .git
 .gitignore
+# Deploy plumbing is not part of the image, and leaving it in the context makes
+# every workflow edit invalidate the COPY layers and force a full rebuild.
+.github
+scripts
+docker-compose*.yml
+Dockerfile
+.dockerignore
+fly.toml
+render.yaml
 .env
 .env.*
+!.env.example
+*.md
 *.log
+*.tsbuildinfo
 test
 coverage
-docker-compose.yml
-README.md
-.dockerignore
-Dockerfile
+create-admin.js
+test-api.js
 .vscode
 .idea
 package-lock.json

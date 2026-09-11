@@ -1,0 +1,28 @@
+# Local development database only. Production runs the API itself from
+# docker-compose.yml against the standalone `adinfinity-pg` container on the VPS.
+#
+#   docker compose -f docker-compose.dev.yml up -d
+#
+# No `name:` on purpose: the project name stays the folder name, so the existing
+# adinfinity-backend_adifinity_pgdata volume keeps being picked up.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: adifinity_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: adifinity
+      POSTGRES_PASSWORD: adifinity_local
+      POSTGRES_DB: invitations
+    ports:
+      - '5432:5432'
+    volumes:
+      - adifinity_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U adifinity -d invitations']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  adifinity_pgdata:
