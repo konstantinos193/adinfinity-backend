@@ -8,7 +8,12 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
-    PassportModule,
+    // register() (not the bare module) is what provides AuthModuleOptions, and
+    // every module that puts JwtAuthGuard on a controller needs it: Nest 12
+    // stopped inheriting the base AuthGuard's @Optional() flag on that
+    // parameter (nestjs/nest#2581), so it is now a hard dependency. It is
+    // registered once here and exported, so consumers import AuthModule.
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -19,5 +24,6 @@ import { JwtStrategy } from './jwt.strategy';
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
+  exports: [PassportModule],
 })
 export class AuthModule {}
