@@ -26,6 +26,19 @@ export class EmailService {
         user: this.config.get<string>('EMAIL_USER'),
         pass: this.config.get<string>('EMAIL_PASS'),
       },
+      // WORKAROUND. Stalwart has a stale certificate record cached in its
+      // store: the files under /opt/stalwart-mail/certs are the valid Let's
+      // Encrypt pair (to 2026-12-23) and the certbot deploy hook installs them
+      // correctly, but the cached record carries the previous cert's window,
+      // which ran out on 2026-10-25. Since then it serves a self-generated
+      // cert, so a verifying client cannot submit at all and every lead mail
+      // died with ESOCKET "self-signed certificate".
+      //
+      // We are talking to our own server by name, so skipping verification is
+      // survivable; losing enquiries is not. Drop this block once the record
+      // is refreshed and `openssl s_client -connect mail.adinfinity.gr:465`
+      // shows CN = mail.adinfinity.gr again.
+      tls: { rejectUnauthorized: false },
     });
   }
 
