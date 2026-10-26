@@ -2,6 +2,16 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
+/**
+ * Everything this service sends goes to the agency in copy as well, so a
+ * notification is never visible only to the couple. Override with NOTIFY_CC
+ * (comma separated) if the list changes.
+ */
+const DEFAULT_NOTIFY_CC = [
+  'konstantinosblavakis@gmail.com',
+  'adenfinity@gmail.com',
+];
+
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
@@ -19,6 +29,17 @@ export class EmailService {
     });
   }
 
+  /** Recipients kept in copy on every outgoing notification. */
+  private notifyCc(): string[] {
+    const raw = this.config.get<string>('NOTIFY_CC');
+    if (!raw) return DEFAULT_NOTIFY_CC;
+
+    return raw
+      .split(',')
+      .map((address) => address.trim())
+      .filter(Boolean);
+  }
+
   async sendRsvpNotification(opts: {
     coupleEmail: string;
     coupleName: string;
@@ -34,15 +55,28 @@ export class EmailService {
   }) {
     const html = buildRsvpEmailHtml(opts);
 
+    // The RSVP row is already stored by the time we get here, so a send
+    // failure must not fail the guest's submission — but it has to be loud
+    // enough to notice, because nothing else records that the couple was
+    // never told.
     try {
-      await this.transporter.sendMail({
+      const result = await this.transporter.sendMail({
         from: `"${this.config.get('EMAIL_FROM_NAME', 'Invitations Platform')}" <${this.config.get('EMAIL_USER')}>`,
         to: opts.coupleEmail,
+        cc: this.notifyCc(),
         subject: `Νέο RSVP από ${opts.guestName}`,
         html,
       });
+
+      if (result.rejected?.length) {
+        this.logger.error(
+          `RSVP email for ${opts.guestName} was rejected for: ${result.rejected.join(', ')}`,
+        );
+      }
     } catch (err) {
-      this.logger.error(`Failed to send RSVP email: ${err}`);
+      this.logger.error(
+        `Failed to send RSVP email for ${opts.guestName} to ${opts.coupleEmail}: ${err}`,
+      );
     }
   }
 
@@ -62,6 +96,7 @@ export class EmailService {
       await this.transporter.sendMail({
         from: `"${this.config.get('EMAIL_FROM_NAME', 'Invitations Platform')}" <${this.config.get('EMAIL_USER')}>`,
         to: opts.to,
+        cc: this.notifyCc(),
         // Lets the agency hit Reply and land in the couple's inbox.
         replyTo: opts.email,
         subject: `Νέα αίτηση προσκλητηρίου — ${opts.coupleName}`,

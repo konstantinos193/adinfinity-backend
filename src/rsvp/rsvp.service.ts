@@ -1,9 +1,24 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ContactRole } from '@prisma/client';
+import { ContactRole, EventCategory } from '@prisma/client';
 import { DietaryType } from './dto/create-rsvp.dto';
 import { EmailService } from '../email/email.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRsvpDto } from './dto/create-rsvp.dto';
+
+/**
+ * Contacts who own the event and should hear about every RSVP. Deliberately
+ * excludes BEST_MAN and MAID_OF_HONOR — they are listed on the invitation as
+ * people to call, not as the people collecting replies.
+ */
+const HOST_ROLES: ContactRole[] = [
+  ContactRole.BRIDE,
+  ContactRole.GROOM,
+  ContactRole.FATHER,
+  ContactRole.MOTHER,
+  ContactRole.GODFATHER,
+  ContactRole.GODMOTHER,
+  ContactRole.HOST,
+];
 
 @Injectable()
 export class RsvpService {
@@ -49,14 +64,18 @@ export class RsvpService {
         })
       : await this.prisma.rSVP.create({ data: rsvpData });
 
-    // Notify both bride and groom by email
-    const emailContacts = invitation.contacts.filter(
-      (c) =>
-        (c.role === ContactRole.BRIDE || c.role === ContactRole.GROOM) &&
-        c.email,
+    // Notify whoever is hosting this event. Filtering on BRIDE/GROOM alone
+    // meant a baptism or birthday invitation notified nobody, since those
+    // carry FATHER/MOTHER/GODPARENT/HOST contacts instead.
+    const hosts = invitation.contacts.filter(
+      (c) => c.email && HOST_ROLES.includes(c.role),
     );
+    // Any other contact with an address is better than telling no one.
+    const emailContacts = hosts.length
+      ? hosts
+      : invitation.contacts.filter((c) => c.email);
 
-    const coupleName = `${invitation.brideName} & ${invitation.groomName}`;
+    const coupleName = describeInvitation(invitation);
     for (const contact of emailContacts) {
       await this.email.sendRsvpNotification({
         coupleEmail: contact.email!,
@@ -74,5 +93,40 @@ export class RsvpService {
     }
 
     return rsvp;
+  }
+}
+
+/**
+ * Subject line / greeting name for the event. "Bride & Groom" only reads
+ * correctly for a wedding; every other category keeps its own names, and
+ * without this a baptism went out as "null & null".
+ */
+function describeInvitation(invitation: {
+  eventCategory: EventCategory;
+  brideName: string | null;
+  groomName: string | null;
+  childName: string | null;
+  honoreeName: string | null;
+  hostName: string | null;
+  eventTitle: string | null;
+}): string {
+  const couple = [invitation.brideName, invitation.groomName]
+    .filter(Boolean)
+    .join(' & ');
+
+  switch (invitation.eventCategory) {
+    case EventCategory.WEDDING:
+      return couple;
+    case EventCategory.BAPTISM:
+      return invitation.childName ?? couple;
+    case EventCategory.WEDDING_BAPTISM:
+      return [couple, invitation.childName].filter(Boolean).join(' — ');
+    default:
+      return (
+        invitation.honoreeName ??
+        invitation.hostName ??
+        invitation.eventTitle ??
+        couple
+      );
   }
 }

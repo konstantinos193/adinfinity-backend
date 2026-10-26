@@ -22,14 +22,10 @@ export class LeadsService {
 
     // Leads are emailed rather than persisted on purpose: adding a Prisma model
     // would need a migration, and this project's deploy.sh does not run them.
+    // That makes the recipient the only copy there is, so it must be a mailbox
+    // someone actually reads — not EMAIL_USER, which is the sending account.
     const to =
-      this.config.get<string>('LEADS_EMAIL') ??
-      this.config.get<string>('EMAIL_USER');
-
-    if (!to) {
-      this.logger.error('No LEADS_EMAIL or EMAIL_USER configured');
-      return { ok: false };
-    }
+      this.config.get<string>('LEADS_EMAIL') ?? 'manos@adinfinity.gr';
 
     await this.email.sendLeadNotification({ to, ...dto });
     return { ok: true };
